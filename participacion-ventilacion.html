@@ -7,6 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root { --primary:#2a5298; --bg:#f4f7fb; --card:#ffffff; --muted:#eef2ff; }
     *{box-sizing:border-box}
@@ -187,7 +189,7 @@
       <button id="saveButton" class="btn btn-success">Guardar Local</button>
       <button id="clearButton" class="btn btn-warning">Limpiar</button>
       <button id="generateSummaryButton" class="btn btn-primary">Generar Resumen</button>
-      <button id="saveToSheetButton" class="btn btn-info" title="Requiere configurar URL de Google Apps Script">Guardar en Google Sheet</button>
+  <button id="saveToSheetButton" class="btn btn-info" title="Requiere configurar URL de Google Apps Script">Guardar en Google</button>
       <button id="printSummaryButton" class="btn btn-danger" style="display:none">Imprimir Resumen</button>
       <div id="feedbackMessage" class="feedback-message"></div>
     </div>
@@ -334,8 +336,20 @@
 
       function printSummary(){ window.print(); }
 
-      // Configure your Google Apps Script Web App URL here (optional)
-      const webAppUrl = '';
+      // URL del Web App de Apps Script (reemplazar)
+      const webAppUrl = 'REEMPLAZA_CON_TU_WEBAPP_URL';
+      function ab2b64(buffer){let binary='';const bytes=new Uint8Array(buffer);for(let i=0;i<bytes.length;i++){binary+=String.fromCharCode(bytes[i]);}return btoa(binary);}    
+      async function buildPdfFromSummary(){
+        // Asegura que el resumen esté generado y visible
+        if(scoreSummaryDiv.style.display==='none') generateSummary();
+        const { jsPDF } = window.jspdf; const pdf=new jsPDF({unit:'mm',format:'a4'});
+        const canvas=await html2canvas(scoreSummaryDiv,{scale:1.5,backgroundColor:'#fff'});
+        const img=canvas.toDataURL('image/png',0.92);
+        const pageW=pdf.internal.pageSize.getWidth(); const pageH=pdf.internal.pageSize.getHeight();
+        const ratio=Math.min(pageW/canvas.width,pageH/canvas.height); const w=canvas.width*ratio; const h=canvas.height*ratio;
+        pdf.addImage(img,'PNG',(pageW-w)/2,10,w,h);
+        return pdf;
+      }
       async function saveToGoogleSheet(){
         if(!webAppUrl || !webAppUrl.startsWith('https://script.google.com/')){
           showFeedback('Configure la URL de Google Apps Script antes de usar esta opción.', 'error');
@@ -345,15 +359,17 @@
         const presenterText = presentadorSelect.value && presentadorSelect.value!=='ninguno' ? presentadorOption.text : 'Ninguno';
         const puntajes = {}; const residentes = {};
         residentIds.forEach(id=>{ calculateResidentScore(id); puntajes[id]= totalScoreSpans[id].textContent; residentes[id]=residentData[id]; });
-        const payload = { fecha:dateInput.value, tema:topicInput.value, evaluador:evaluatorInput.value, presentador: presenterText, puntajes, residentes };
+        const meta = { fecha:dateInput.value, tema:topicInput.value, evaluador:evaluatorInput.value, presentador: presenterText, puntajes, residentes };
+        const pdf = await buildPdfFromSummary();
+        const pdfName = `Notas_Participacion_${(topicInput.value||'Sesion').replace(/\s+/g,'_')}_${dateInput.value||new Date().toISOString().slice(0,10)}.pdf`;
+        const ab = pdf.output('arraybuffer');
         saveToSheetButton.disabled = true; saveToSheetButton.textContent = 'Guardando...';
         try{
-          const resp = await fetch(webAppUrl, { method:'POST', mode:'cors', body: JSON.stringify(payload), headers:{ 'Content-Type':'text/plain;charset=utf-8' } });
-          const result = await resp.json();
-          if(result.result==='success'){ showFeedback('Guardado en Google Sheet','success'); }
-          else{ showFeedback(`Error: ${result.message || 'Desconocido'}`,'error'); }
+          const resp = await fetch(webAppUrl, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ type:'participacion', meta, pdfBase64: ab2b64(ab), pdfFileName: pdfName }) });
+          let ok=true; try{ const j=await resp.json(); ok=!!j.ok; } catch {}
+          showFeedback(ok? 'Guardado en Google' : 'Enviado sin confirmación','success');
         }catch(err){ console.error(err); showFeedback('Error de conexión al guardar','error'); }
-        finally{ saveToSheetButton.disabled=false; saveToSheetButton.textContent='Guardar en Google Sheet'; }
+        finally{ saveToSheetButton.disabled=false; saveToSheetButton.textContent='Guardar en Google'; }
       }
 
       // Bindings

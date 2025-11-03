@@ -242,6 +242,7 @@
       <section class="card" id="totalScoreCardScreen"><div id="totalScoreCard" class="card-body text-center"><h4>Puntuación Total: <span id="totalScoreDisplay">0 / 100</span></h4></div></section>
       <section class="card" id="buttonsCard"><div class="card-footer text-center">
         <button type="button" id="calculateButton" class="btn btn-primary me-2">Validar y Calcular</button>
+        <button type="button" id="saveGoogleButton" class="btn btn-info me-2" disabled>Guardar en Google</button>
         <button type="button" id="exportPdfButton" class="btn btn-success" disabled>Exportar PDF</button>
         <button type="reset" id="resetButton" class="btn btn-warning ms-2">Limpiar</button>
       </div></section>
@@ -251,9 +252,12 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded',()=>{
+      const GAS_URL = 'REEMPLAZA_CON_TU_WEBAPP_URL';
+      function ab2b64(buffer){let binary='';const bytes=new Uint8Array(buffer);for(let i=0;i<bytes.length;i++){binary+=String.fromCharCode(bytes[i]);}return btoa(binary);}    
       const form=document.getElementById('rubricForm');
       const totalScoreDisplay=document.getElementById('totalScoreDisplay');
       const exportPdfButton=document.getElementById('exportPdfButton');
+      const saveGoogleButton=document.getElementById('saveGoogleButton');
       const resetButton=document.getElementById('resetButton');
       const calculateButton=document.getElementById('calculateButton');
       const rubricSections=document.querySelectorAll('.rubric-section');
@@ -262,11 +266,11 @@
       function calculateSectionScore(section){let s=0;section.querySelectorAll('input[type="radio"]:checked').forEach(r=>{const v=parseInt(r.value,10);if(!isNaN(v)) s+=v;});return s;}
       function updateScoresDisplay(){let t=0;rubricSections.forEach(sec=>{const ss=calculateSectionScore(sec);const m=parseInt(sec.dataset.maxScore,10);const d=sec.querySelector('.score-display');if(d) d.textContent=`Puntos: ${ss} / ${m}`;t+=ss;});const scaled=(t/directMaxScore)*finalMaxScore;const f=Math.round(scaled*10)/10;totalScoreDisplay.textContent=`${f} / ${finalMaxScore}`;return {finalScore:f};}
 
-      form.addEventListener('change',e=>{ if(e.target.type==='radio'){ updateScoresDisplay(); exportPdfButton.disabled=true; form.classList.remove('was-validated'); }});
-      resetButton.addEventListener('click',()=>{ form.reset(); rubricSections.forEach(sec=>{const m=parseInt(sec.dataset.maxScore,10);const d=sec.querySelector('.score-display'); if(d) d.textContent=`Puntos: 0 / ${m}`;}); totalScoreDisplay.textContent='0 / 100'; exportPdfButton.disabled=true; });
-      calculateButton.addEventListener('click',()=>{ if(!form.checkValidity()){ form.classList.add('was-validated'); alert('Complete todos los criterios.'); } else { form.classList.remove('was-validated'); updateScoresDisplay(); exportPdfButton.disabled=false; }});
+  form.addEventListener('change',e=>{ if(e.target.type==='radio'){ updateScoresDisplay(); exportPdfButton.disabled=true; saveGoogleButton.disabled=true; form.classList.remove('was-validated'); }});
+  resetButton.addEventListener('click',()=>{ form.reset(); rubricSections.forEach(sec=>{const m=parseInt(sec.dataset.maxScore,10);const d=sec.querySelector('.score-display'); if(d) d.textContent=`Puntos: 0 / ${m}`;}); totalScoreDisplay.textContent='0 / 100'; exportPdfButton.disabled=true; saveGoogleButton.disabled=true; });
+  calculateButton.addEventListener('click',()=>{ if(!form.checkValidity()){ form.classList.add('was-validated'); alert('Complete todos los criterios.'); } else { form.classList.remove('was-validated'); updateScoresDisplay(); exportPdfButton.disabled=false; saveGoogleButton.disabled=false; }});
 
-      exportPdfButton.addEventListener('click', async ()=>{
+      async function buildPdf(){
         const { jsPDF } = window.jspdf; const pdf=new jsPDF({orientation:'p',unit:'mm',format:'a4'});
         const margin=10; const pdfW=pdf.internal.pageSize.getWidth(); let y=margin; let page=1; const footer=10; const avail=pdf.internal.pageSize.getHeight()-margin-footer;
         function addHeaderFooter(){ pdf.setFontSize(8); pdf.setTextColor(150); const t=new Date().toLocaleString('es-NI',{timeZone:'America/Managua'}); pdf.text(`Generado: ${t}`, margin, pdf.internal.pageSize.getHeight()-margin+5); pdf.text(`Página ${page}`, pdfW-margin, pdf.internal.pageSize.getHeight()-margin+5, {align:'right'}); pdf.setTextColor(51); }
@@ -275,7 +279,34 @@
         pdf.setFont('helvetica','bold'); pdf.setFontSize(16); pdf.setTextColor(37,99,235); pdf.text('Reporte – Clases teóricas', pdfW/2, y, {align:'center'}); y+=10; pdf.setFont('helvetica','normal'); pdf.setTextColor(51);
         const blocks=['rubricForm'];
         for(const id of blocks){ const img=await capture(id); add(img, document.getElementById(id)); }
-        addHeaderFooter(); pdf.save(`Notas_Clases_${(document.getElementById('residentName').value||'Residente').replace(/\s+/g,'_')}_${document.getElementById('evaluationDate').value||new Date().toISOString().slice(0,10)}.pdf`);
+        addHeaderFooter();
+        return pdf;
+      }
+
+      exportPdfButton.addEventListener('click', async ()=>{
+        const pdf = await buildPdf();
+        pdf.save(`Notas_Clases_${(document.getElementById('residentName').value||'Residente').replace(/\s+/g,'_')}_${document.getElementById('evaluationDate').value||new Date().toISOString().slice(0,10)}.pdf`);
+      });
+
+      saveGoogleButton.addEventListener('click', async ()=>{
+        const pdf = await buildPdf();
+        const ab = pdf.output('arraybuffer');
+        const meta = {
+          evaluator: document.getElementById('evaluatorName').value||'',
+          resident: document.getElementById('residentName').value||'',
+          date: document.getElementById('evaluationDate').value||'',
+          topic: document.getElementById('classTopic').value||'',
+          total: totalScoreDisplay.textContent,
+          fileName: `Notas_Clases_${(document.getElementById('residentName').value||'Residente').replace(/\s+/g,'_')}_${document.getElementById('evaluationDate').value||new Date().toISOString().slice(0,10)}.pdf`
+        };
+        if(!GAS_URL.startsWith('https://script.google.com/')){ alert('Configure GAS_URL con su Web App de Apps Script.'); return; }
+        saveGoogleButton.disabled=true; saveGoogleButton.textContent='Guardando...';
+        try{
+          const resp = await fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ type:'clases', meta, pdfBase64: ab2b64(ab) }) });
+          let ok=true; try{ const j=await resp.json(); ok=!!j.ok; }catch{}
+          alert(ok? 'Guardado en Google Sheets/Drive' : 'Enviado, pero no se pudo confirmar.');
+        }catch(e){ console.error(e); alert('Error al enviar a Google'); }
+        finally{ saveGoogleButton.disabled=false; saveGoogleButton.textContent='Guardar en Google'; }
       });
     });
   </script>

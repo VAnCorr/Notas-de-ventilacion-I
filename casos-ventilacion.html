@@ -153,6 +153,7 @@
       <section class="card"><div class="card-body text-center">
         <h4>Total: <span id="total">0 / 100</span></h4>
         <button type="button" id="calc" class="btn btn-primary me-2">Validar y Calcular</button>
+        <button type="button" id="save" class="btn btn-info me-2" disabled>Guardar en Google</button>
         <button type="button" id="pdf" class="btn btn-success" disabled>Exportar PDF</button>
         <button type="reset" class="btn btn-warning ms-2">Limpiar</button>
       </div></section>
@@ -160,13 +161,18 @@
   </div>
 
   <script>
-    const sections=document.querySelectorAll('.rubric-section');
+  const GAS_URL='REEMPLAZA_CON_TU_WEBAPP_URL';
+  function ab2b64(buffer){let binary='';const bytes=new Uint8Array(buffer);for(let i=0;i<bytes.length;i++){binary+=String.fromCharCode(bytes[i]);}return btoa(binary);}    
+  const sections=document.querySelectorAll('.rubric-section');
     const totalEl=document.getElementById('total');
     function sectionScore(sec){let s=0;sec.querySelectorAll('input[type=radio]:checked').forEach(r=>s+=parseInt(r.value||'0'));return s;}
     function update(){let t=0;sections.forEach(sec=>{const s=sectionScore(sec);const m=parseInt(sec.dataset.maxScore,10);sec.querySelector('.score-display').textContent=`Puntos: ${s} / ${m}`;t+=s;});totalEl.textContent=`${t} / 100`;return t;}
-    document.getElementById('rubricForm').addEventListener('change',e=>{if(e.target.type==='radio'){update();document.getElementById('pdf').disabled=true;}});
-    document.getElementById('calc').addEventListener('click',()=>{const form=document.getElementById('rubricForm');if(!form.checkValidity()){form.classList.add('was-validated');alert('Complete todos los criterios');return;}form.classList.remove('was-validated');update();document.getElementById('pdf').disabled=false;});
-    document.getElementById('pdf').addEventListener('click',async()=>{const { jsPDF }=window.jspdf;const pdf=new jsPDF({unit:'mm',format:'a4'});const el=document.body;const canvas=await html2canvas(el,{scale:1.2,backgroundColor:'#fff'});const img=canvas.toDataURL('image/png',0.92);const pageW=pdf.internal.pageSize.getWidth();const pageH=pdf.internal.pageSize.getHeight();const ratio=Math.min(pageW/canvas.width,pageH/canvas.height);const w=canvas.width*ratio;const h=canvas.height*ratio;pdf.addImage(img,'PNG',(pageW-w)/2,5,w,h);pdf.save(`Notas_Casos_${(document.getElementById('resident').value||'Residente').replace(/\s+/g,'_')}_${document.getElementById('date').value||new Date().toISOString().slice(0,10)}.pdf`);});
+    const saveBtn=document.getElementById('save');
+    document.getElementById('rubricForm').addEventListener('change',e=>{if(e.target.type==='radio'){update();document.getElementById('pdf').disabled=true; saveBtn.disabled=true;}});
+    document.getElementById('calc').addEventListener('click',()=>{const form=document.getElementById('rubricForm');if(!form.checkValidity()){form.classList.add('was-validated');alert('Complete todos los criterios');return;}form.classList.remove('was-validated');update();document.getElementById('pdf').disabled=false; saveBtn.disabled=false;});
+    async function buildPdf(){const { jsPDF }=window.jspdf;const pdf=new jsPDF({unit:'mm',format:'a4'});const el=document.body;const canvas=await html2canvas(el,{scale:1.2,backgroundColor:'#fff'});const img=canvas.toDataURL('image/png',0.92);const pageW=pdf.internal.pageSize.getWidth();const pageH=pdf.internal.pageSize.getHeight();const ratio=Math.min(pageW/canvas.width,pageH/canvas.height);const w=canvas.width*ratio;const h=canvas.height*ratio;pdf.addImage(img,'PNG',(pageW-w)/2,5,w,h);return pdf;}
+    document.getElementById('pdf').addEventListener('click',async()=>{const pdf=await buildPdf();pdf.save(`Notas_Casos_${(document.getElementById('resident').value||'Residente').replace(/\s+/g,'_')}_${document.getElementById('date').value||new Date().toISOString().slice(0,10)}.pdf`);});
+    saveBtn.addEventListener('click', async()=>{if(!GAS_URL.startsWith('https://script.google.com/')){alert('Configure GAS_URL con su Web App de Apps Script.');return;}const pdf=await buildPdf();const ab=pdf.output('arraybuffer');const meta={evaluator:document.getElementById('evaluator').value||'',resident:document.getElementById('resident').value||'',date:document.getElementById('date').value||'',caseName:document.getElementById('case').value||'',total:totalEl.textContent,fileName:`Notas_Casos_${(document.getElementById('resident').value||'Residente').replace(/\s+/g,'_')}_${document.getElementById('date').value||new Date().toISOString().slice(0,10)}.pdf`};saveBtn.disabled=true;saveBtn.textContent='Guardando...';try{const resp=await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'casos',meta,pdfBase64:ab2b64(ab)})});let ok=true;try{const j=await resp.json();ok=!!j.ok;}catch{}alert(ok?'Guardado en Google Sheets/Drive':'Enviado, sin confirmación.');}catch(e){console.error(e);alert('Error al enviar a Google');}finally{saveBtn.disabled=false;saveBtn.textContent='Guardar en Google';}});
   </script>
 </body>
 </html>
