@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notas de evaluación práctica – Ventilación Mecánica I</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    body{font-family:'Poppins',sans-serif;background:#f8fafc;color:#1f2937}
+    .card{border:none;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,.06)}
+    .card-header{background:#eef2ff;color:#4338ca;font-weight:700}
+    .criterion-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f1f5f9}
+    .criterion-row:last-child{border-bottom:0}
+    .criterion-row .label{flex:1}
+    .criterion-row .max{width:110px;text-align:center}
+    .criterion-row input[type=number]{width:120px}
+  </style>
+</head>
+<body>
+  <div class="container my-4">
+    <header class="text-center mb-4">
+      <h1 class="h4 text-primary">Evaluación práctica</h1>
+      <p class="text-muted mb-0">Curso Ventilación Mecánica I</p>
+      <p><a href="index.html" class="small">← Volver al inicio</a></p>
+    </header>
+
+    <form id="form" class="needs-validation" novalidate>
+      <section class="card mb-3">
+        <div class="card-header">Información</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4"><label class="form-label">Evaluador</label><input id="evaluator" class="form-control" required></div>
+            <div class="col-md-4"><label class="form-label">Residente</label><input id="resident" class="form-control" required></div>
+            <div class="col-md-4"><label class="form-label">Fecha</label><input id="date" type="date" class="form-control" required></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card mb-3">
+        <div class="card-header">Criterios (máximo 100)</div>
+        <div class="card-body">
+          <div class="criterion-row">
+            <div class="label">Desempeño clínico</div>
+            <div class="max text-muted">Máx: 35</div>
+            <input type="number" class="form-control" id="c1" min="0" max="35" step="1" required placeholder="0-35">
+          </div>
+          <div class="criterion-row">
+            <div class="label">Habilidades procedurales</div>
+            <div class="max text-muted">Máx: 20</div>
+            <input type="number" class="form-control" id="c2" min="0" max="20" step="1" required placeholder="0-20">
+          </div>
+          <div class="criterion-row">
+            <div class="label">Comunicación</div>
+            <div class="max text-muted">Máx: 15</div>
+            <input type="number" class="form-control" id="c3" min="0" max="15" step="1" required placeholder="0-15">
+          </div>
+          <div class="criterion-row">
+            <div class="label">Profesionalismo</div>
+            <div class="max text-muted">Máx: 15</div>
+            <input type="number" class="form-control" id="c4" min="0" max="15" step="1" required placeholder="0-15">
+          </div>
+          <div class="criterion-row">
+            <div class="label">Registros/Documentación</div>
+            <div class="max text-muted">Máx: 15</div>
+            <input type="number" class="form-control" id="c5" min="0" max="15" step="1" required placeholder="0-15">
+          </div>
+        </div>
+      </section>
+
+      <section class="card mb-3"><div class="card-header">Comentarios</div>
+        <div class="card-body"><textarea id="comments" class="form-control" rows="4" placeholder="Observaciones…"></textarea></div>
+      </section>
+
+      <section class="card">
+        <div class="card-body text-center">
+          <h4>Total: <span id="total">0 / 100</span></h4>
+          <button type="button" id="calc" class="btn btn-primary me-2">Validar y Calcular</button>
+          <button type="button" id="pdf" class="btn btn-success" disabled>Exportar PDF</button>
+          <button type="reset" class="btn btn-warning ms-2">Limpiar</button>
+        </div>
+      </section>
+    </form>
+  </div>
+
+  <script>
+    const inputs=['c1','c2','c3','c4','c5'].map(id=>document.getElementById(id));
+    const totalEl=document.getElementById('total');
+    function clamp(v,min,max){v=parseInt(v||'0');if(isNaN(v)) v=0;return Math.min(Math.max(v,min),max);}
+    function calc(){let t=0;const max=[35,20,15,15,15];inputs.forEach((el,i)=>{el.value=clamp(el.value,0,max[i]);t+=parseInt(el.value||'0');});totalEl.textContent=`${t} / 100`;return t;}
+    inputs.forEach(el=>el.addEventListener('input',()=>{calc();document.getElementById('pdf').disabled=true;}));
+    document.getElementById('calc').addEventListener('click',()=>{const form=document.getElementById('form');if(!form.checkValidity()){form.classList.add('was-validated');alert('Complete todos los campos requeridos');return;}form.classList.remove('was-validated');calc();document.getElementById('pdf').disabled=false;});
+    document.getElementById('form').addEventListener('reset',()=>{setTimeout(()=>{totalEl.textContent='0 / 100';document.getElementById('pdf').disabled=true;},0)});
+    document.getElementById('pdf').addEventListener('click',async()=>{const { jsPDF }=window.jspdf;const pdf=new jsPDF({unit:'mm',format:'a4'});const el=document.body;const canvas=await html2canvas(el,{scale:1.2,backgroundColor:'#fff'});const img=canvas.toDataURL('image/png',0.92);const pageW=pdf.internal.pageSize.getWidth();const pageH=pdf.internal.pageSize.getHeight();const ratio=Math.min(pageW/canvas.width,pageH/canvas.height);const w=canvas.width*ratio;const h=canvas.height*ratio;pdf.addImage(img,'PNG',(pageW-w)/2,5,w,h);pdf.save(`Notas_Practica_${(document.getElementById('resident').value||'Residente').replace(/\s+/g,'_')}_${document.getElementById('date').value||new Date().toISOString().slice(0,10)}.pdf`);});
+  </script>
+</body>
+</html>

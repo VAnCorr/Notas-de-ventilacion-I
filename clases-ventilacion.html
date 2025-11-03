@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notas de clases – Ventilación Mecánica I</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    body{font-family:'Poppins',sans-serif;background:#f9f9fb;color:#333}
+    .container{max-width:960px}
+    .card{border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,.06);border:none;margin-bottom:1.2rem}
+    .card-header{background:#eef2ff;color:#2563eb;font-weight:700}
+    .rubric-table th,.rubric-table td{vertical-align:top;text-align:center}
+    .rubric-table th:first-child,.rubric-table td:first-child{text-align:left;width:40%}
+    .score-options-wrapper{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+    .score-value{font-size:11px;color:#555}
+    .form-check-input[type=radio]{transform:scale(1.15)}
+    #totalScoreCard{background:#e0f2fe;border:1px solid #bae6fd}
+    #totalScoreCard h4{color:#0369a1;font-weight:700}
+  </style>
+</head>
+<body>
+  <div class="container my-4">
+    <header class="text-center mb-4">
+      <h1 class="h3 text-primary">Rúbrica – Clases teóricas</h1>
+      <p class="text-muted mb-0">Curso Ventilación Mecánica I</p>
+      <p><a href="index.html" class="small">← Volver al inicio</a></p>
+    </header>
+
+    <form id="rubricForm" class="needs-validation" novalidate>
+      <section class="card">
+        <div class="card-header">Información general</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" for="evaluatorName">Evaluador</label>
+              <input class="form-control" id="evaluatorName" required placeholder="Su nombre" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="residentName">Residente evaluado</label>
+              <input class="form-control" id="residentName" required placeholder="Nombre del residente" />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="evaluationDate">Fecha</label>
+              <input type="date" class="form-control" id="evaluationDate" required />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="classTopic">Tema</label>
+              <input class="form-control" id="classTopic" required placeholder="Tema evaluado" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card rubric-section" data-max-score="25" id="section1">
+        <div class="card-header">I. Preparación y organización (25 pts) <span class="float-end text-muted score-display">Puntos: 0 / 25</span></div>
+        <div class="card-body p-0">
+          <table class="table mb-0 rubric-table">
+            <tbody>
+              <tr>
+                <td>Dominio del tema</td>
+                <td>
+                  <div class="score-options-wrapper">
+                    <label class="score-value">5</label><input class="form-check-input" type="radio" name="dominioTema" value="5" required>
+                    <label class="score-value">4</label><input class="form-check-input" type="radio" name="dominioTema" value="4">
+                    <label class="score-value">3</label><input class="form-check-input" type="radio" name="dominioTema" value="3">
+                    <label class="score-value">1</label><input class="form-check-input" type="radio" name="dominioTema" value="1">
+                    <label class="score-value">0</label><input class="form-check-input" type="radio" name="dominioTema" value="0">
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>Organización de la clase</td>
+                <td>
+                  <div class="score-options-wrapper">
+                    <label class="score-value">5</label><input class="form-check-input" type="radio" name="organizacionClase" value="5" required>
+                    <label class="score-value">4</label><input class="form-check-input" type="radio" name="organizacionClase" value="4">
+                    <label class="score-value">3</label><input class="form-check-input" type="radio" name="organizacionClase" value="3">
+                    <label class="score-value">1</label><input class="form-check-input" type="radio" name="organizacionClase" value="1">
+                    <label class="score-value">0</label><input class="form-check-input" type="radio" name="organizacionClase" value="0">
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>Objetivos claros</td>
+                <td>
+                  <div class="score-options-wrapper">
+                    <label class="score-value">5</label><input class="form-check-input" type="radio" name="objetivosClaros" value="5" required>
+                    <label class="score-value">4</label><input class="form-check-input" type="radio" name="objetivosClaros" value="4">
+                    <label class="score-value">3</label><input class="form-check-input" type="radio" name="objetivosClaros" value="3">
+                    <label class="score-value">1</label><input class="form-check-input" type="radio" name="objetivosClaros" value="1">
+                    <label class="score-value">0</label><input class="form-check-input" type="radio" name="objetivosClaros" value="0">
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>Material de apoyo</td>
+                <td>
+                  <div class="score-options-wrapper">
+                    <label class="score-value">5</label><input class="form-check-input" type="radio" name="materialApoyo" value="5" required>
+                    <label class="score-value">4</label><input class="form-check-input" type="radio" name="materialApoyo" value="4">
+                    <label class="score-value">3</label><input class="form-check-input" type="radio" name="materialApoyo" value="3">
+                    <label class="score-value">1</label><input class="form-check-input" type="radio" name="materialApoyo" value="1">
+                    <label class="score-value">0</label><input class="form-check-input" type="radio" name="materialApoyo" value="0">
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>Manejo del tiempo</td>
+                <td>
+                  <div class="score-options-wrapper">
+                    <label class="score-value">5</label><input class="form-check-input" type="radio" name="manejoTiempo" value="5" required>
+                    <label class="score-value">4</label><input class="form-check-input" type="radio" name="manejoTiempo" value="4">
+                    <label class="score-value">3</label><input class="form-check-input" type="radio" name="manejoTiempo" value="3">
+                    <label class="score-value">1</label><input class="form-check-input" type="radio" name="manejoTiempo" value="1">
+                    <label class="score-value">0</label><input class="form-check-input" type="radio" name="manejoTiempo" value="0">
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card rubric-section" data-max-score="35" id="section2">
+        <div class="card-header">II. Metodología y habilidades de enseñanza (35 pts) <span class="float-end text-muted score-display">Puntos: 0 / 35</span></div>
+        <div class="card-body p-0">
+          <table class="table mb-0 rubric-table"><tbody>
+            <tr><td>Claridad en la exposición</td><td><div class="score-options-wrapper">
+              <label class="score-value">7</label><input class="form-check-input" type="radio" name="claridadExpo" value="7" required>
+              <label class="score-value">6</label><input class="form-check-input" type="radio" name="claridadExpo" value="6">
+              <label class="score-value">5</label><input class="form-check-input" type="radio" name="claridadExpo" value="5">
+              <label class="score-value">4</label><input class="form-check-input" type="radio" name="claridadExpo" value="4">
+              <label class="score-value">3</label><input class="form-check-input" type="radio" name="claridadExpo" value="3">
+              <label class="score-value">2</label><input class="form-check-input" type="radio" name="claridadExpo" value="2">
+              <label class="score-value">1</label><input class="form-check-input" type="radio" name="claridadExpo" value="1">
+              <label class="score-value">0</label><input class="form-check-input" type="radio" name="claridadExpo" value="0">
+            </div></td></tr>
+            <tr><td>Fomento de la participación</td><td><div class="score-options-wrapper">
+              <label class="score-value">7</label><input class="form-check-input" type="radio" name="fomentoPart" value="7" required>
+              <label class="score-value">6</label><input class="form-check-input" type="radio" name="fomentoPart" value="6">
+              <label class="score-value">5</label><input class="form-check-input" type="radio" name="fomentoPart" value="5">
+              <label class="score-value">4</label><input class="form-check-input" type="radio" name="fomentoPart" value="4">
+              <label class="score-value">3</label><input class="form-check-input" type="radio" name="fomentoPart" value="3">
+              <label class="score-value">2</label><input class="form-check-input" type="radio" name="fomentoPart" value="2">
+              <label class="score-value">1</label><input class="form-check-input" type="radio" name="fomentoPart" value="1">
+              <label class="score-value">0</label><input class="form-check-input" type="radio" name="fomentoPart" value="0">
+            </div></td></tr>
+            <tr><td>Uso de ejemplos/casos</td><td><div class="score-options-wrapper">
+              <label class="score-value">7</label><input class="form-check-input" type="radio" name="usoEjemplos" value="7" required>
+              <label class="score-value">6</label><input class="form-check-input" type="radio" name="usoEjemplos" value="6">
+              <label class="score-value">5</label><input class="form-check-input" type="radio" name="usoEjemplos" value="5">
+              <label class="score-value">4</label><input class="form-check-input" type="radio" name="usoEjemplos" value="4">
+              <label class="score-value">3</label><input class="form-check-input" type="radio" name="usoEjemplos" value="3">
+              <label class="score-value">2</label><input class="form-check-input" type="radio" name="usoEjemplos" value="2">
+              <label class="score-value">1</label><input class="form-check-input" type="radio" name="usoEjemplos" value="1">
+              <label class="score-value">0</label><input class="form-check-input" type="radio" name="usoEjemplos" value="0">
+            </div></td></tr>
+            <tr><td>Adaptación al nivel</td><td><div class="score-options-wrapper">
+              <label class="score-value">7</label><input class="form-check-input" type="radio" name="adaptacionNivel" value="7" required>
+              <label class="score-value">6</label><input class="form-check-input" type="radio" name="adaptacionNivel" value="6">
+              <label class="score-value">5</label><input class="form-check-input" type="radio" name="adaptacionNivel" value="5">
+              <label class="score-value">4</label><input class="form-check-input" type="radio" name="adaptacionNivel" value="4">
+              <label class="score-value">3</label><input class="form-check-input" type="radio" name="adaptacionNivel" value="3">
+              <label class="score-value">2</label><input class="form-check-input" type="radio" name="adaptacionNivel" value="2">
+              <label class="score-value">1</label><input class="form-check-input" type="radio" name="adaptacionNivel" value="1">
+              <label class="score-value">0</label><input class="form-check-input" type="radio" name="adaptacionNivel" value="0">
+            </div></td></tr>
+            <tr><td>Entusiasmo e interés</td><td><div class="score-options-wrapper">
+              <label class="score-value">7</label><input class="form-check-input" type="radio" name="entusiasmoInteres" value="7" required>
+              <label class="score-value">6</label><input class="form-check-input" type="radio" name="entusiasmoInteres" value="6">
+              <label class="score-value">5</label><input class="form-check-input" type="radio" name="entusiasmoInteres" value="5">
+              <label class="score-value">4</label><input class="form-check-input" type="radio" name="entusiasmoInteres" value="4">
+              <label class="score-value">3</label><input class="form-check-input" type="radio" name="entusiasmoInteres" value="3">
+              <label class="score-value">2</label><input class="form-check-input" type="radio" name="entusiasmoInteres" value="2">
+              <label class="score-value">1</label><input class="form-check-input" type="radio" name="entusiasmoInteres" value="1">
+              <label class="score-value">0</label><input class="form-check-input" type="radio" name="entusiasmoInteres" value="0">
+            </div></td></tr>
+          </tbody></table>
+        </div>
+      </section>
+
+      <section class="card rubric-section" data-max-score="15" id="section3">
+        <div class="card-header">III. Interacción y comunicación (15 pts) <span class="float-end text-muted score-display">Puntos: 0 / 15</span></div>
+        <div class="card-body p-0"><table class="table mb-0 rubric-table"><tbody>
+          <tr><td>Habilidad de escucha</td><td><div class="score-options-wrapper">
+            <label class="score-value">5</label><input class="form-check-input" type="radio" name="habilidadEscucha" value="5" required>
+            <label class="score-value">4</label><input class="form-check-input" type="radio" name="habilidadEscucha" value="4">
+            <label class="score-value">3</label><input class="form-check-input" type="radio" name="habilidadEscucha" value="3">
+            <label class="score-value">1</label><input class="form-check-input" type="radio" name="habilidadEscucha" value="1">
+            <label class="score-value">0</label><input class="form-check-input" type="radio" name="habilidadEscucha" value="0">
+          </div></td></tr>
+          <tr><td>Respeto y profesionalismo</td><td><div class="score-options-wrapper">
+            <label class="score-value">5</label><input class="form-check-input" type="radio" name="respetoProf" value="5" required>
+            <label class="score-value">4</label><input class="form-check-input" type="radio" name="respetoProf" value="4">
+            <label class="score-value">3</label><input class="form-check-input" type="radio" name="respetoProf" value="3">
+            <label class="score-value">1</label><input class="form-check-input" type="radio" name="respetoProf" value="1">
+            <label class="score-value">0</label><input class="form-check-input" type="radio" name="respetoProf" value="0">
+          </div></td></tr>
+          <tr><td>Comunicación no verbal</td><td><div class="score-options-wrapper">
+            <label class="score-value">5</label><input class="form-check-input" type="radio" name="comunicacionNV" value="5" required>
+            <label class="score-value">4</label><input class="form-check-input" type="radio" name="comunicacionNV" value="4">
+            <label class="score-value">3</label><input class="form-check-input" type="radio" name="comunicacionNV" value="3">
+            <label class="score-value">1</label><input class="form-check-input" type="radio" name="comunicacionNV" value="1">
+            <label class="score-value">0</label><input class="form-check-input" type="radio" name="comunicacionNV" value="0">
+          </div></td></tr>
+        </tbody></table></div>
+      </section>
+
+      <section class="card rubric-section" data-max-score="15" id="section4">
+        <div class="card-header">IV. Relevancia clínica y aplicabilidad (15 pts) <span class="float-end text-muted score-display">Puntos: 0 / 15</span></div>
+        <div class="card-body p-0"><table class="table mb-0 rubric-table"><tbody>
+          <tr><td>Conexión con la práctica</td><td><div class="score-options-wrapper">
+            <label class="score-value">5</label><input class="form-check-input" type="radio" name="conexionPractica" value="5" required>
+            <label class="score-value">4</label><input class="form-check-input" type="radio" name="conexionPractica" value="4">
+            <label class="score-value">3</label><input class="form-check-input" type="radio" name="conexionPractica" value="3">
+            <label class="score-value">1</label><input class="form-check-input" type="radio" name="conexionPractica" value="1">
+            <label class="score-value">0</label><input class="form-check-input" type="radio" name="conexionPractica" value="0">
+          </div></td></tr>
+          <tr><td>Fomento del pensamiento crítico</td><td><div class="score-options-wrapper">
+            <label class="score-value">5</label><input class="form-check-input" type="radio" name="fomentoPensamiento" value="5" required>
+            <label class="score-value">4</label><input class="form-check-input" type="radio" name="fomentoPensamiento" value="4">
+            <label class="score-value">3</label><input class="form-check-input" type="radio" name="fomentoPensamiento" value="3">
+            <label class="score-value">1</label><input class="form-check-input" type="radio" name="fomentoPensamiento" value="1">
+            <label class="score-value">0</label><input class="form-check-input" type="radio" name="fomentoPensamiento" value="0">
+          </div></td></tr>
+          <tr><td>Actualización del contenido</td><td><div class="score-options-wrapper">
+            <label class="score-value">5</label><input class="form-check-input" type="radio" name="actualizacionCont" value="5" required>
+            <label class="score-value">4</label><input class="form-check-input" type="radio" name="actualizacionCont" value="4">
+            <label class="score-value">3</label><input class="form-check-input" type="radio" name="actualizacionCont" value="3">
+            <label class="score-value">1</label><input class="form-check-input" type="radio" name="actualizacionCont" value="1">
+            <label class="score-value">0</label><input class="form-check-input" type="radio" name="actualizacionCont" value="0">
+          </div></td></tr>
+        </tbody></table></div>
+      </section>
+
+      <section class="card" id="totalScoreCardScreen"><div id="totalScoreCard" class="card-body text-center"><h4>Puntuación Total: <span id="totalScoreDisplay">0 / 100</span></h4></div></section>
+      <section class="card" id="buttonsCard"><div class="card-footer text-center">
+        <button type="button" id="calculateButton" class="btn btn-primary me-2">Validar y Calcular</button>
+        <button type="button" id="exportPdfButton" class="btn btn-success" disabled>Exportar PDF</button>
+        <button type="reset" id="resetButton" class="btn btn-warning ms-2">Limpiar</button>
+      </div></section>
+    </form>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded',()=>{
+      const form=document.getElementById('rubricForm');
+      const totalScoreDisplay=document.getElementById('totalScoreDisplay');
+      const exportPdfButton=document.getElementById('exportPdfButton');
+      const resetButton=document.getElementById('resetButton');
+      const calculateButton=document.getElementById('calculateButton');
+      const rubricSections=document.querySelectorAll('.rubric-section');
+      const directMaxScore=90, finalMaxScore=100; // igual que plantilla base
+
+      function calculateSectionScore(section){let s=0;section.querySelectorAll('input[type="radio"]:checked').forEach(r=>{const v=parseInt(r.value,10);if(!isNaN(v)) s+=v;});return s;}
+      function updateScoresDisplay(){let t=0;rubricSections.forEach(sec=>{const ss=calculateSectionScore(sec);const m=parseInt(sec.dataset.maxScore,10);const d=sec.querySelector('.score-display');if(d) d.textContent=`Puntos: ${ss} / ${m}`;t+=ss;});const scaled=(t/directMaxScore)*finalMaxScore;const f=Math.round(scaled*10)/10;totalScoreDisplay.textContent=`${f} / ${finalMaxScore}`;return {finalScore:f};}
+
+      form.addEventListener('change',e=>{ if(e.target.type==='radio'){ updateScoresDisplay(); exportPdfButton.disabled=true; form.classList.remove('was-validated'); }});
+      resetButton.addEventListener('click',()=>{ form.reset(); rubricSections.forEach(sec=>{const m=parseInt(sec.dataset.maxScore,10);const d=sec.querySelector('.score-display'); if(d) d.textContent=`Puntos: 0 / ${m}`;}); totalScoreDisplay.textContent='0 / 100'; exportPdfButton.disabled=true; });
+      calculateButton.addEventListener('click',()=>{ if(!form.checkValidity()){ form.classList.add('was-validated'); alert('Complete todos los criterios.'); } else { form.classList.remove('was-validated'); updateScoresDisplay(); exportPdfButton.disabled=false; }});
+
+      exportPdfButton.addEventListener('click', async ()=>{
+        const { jsPDF } = window.jspdf; const pdf=new jsPDF({orientation:'p',unit:'mm',format:'a4'});
+        const margin=10; const pdfW=pdf.internal.pageSize.getWidth(); let y=margin; let page=1; const footer=10; const avail=pdf.internal.pageSize.getHeight()-margin-footer;
+        function addHeaderFooter(){ pdf.setFontSize(8); pdf.setTextColor(150); const t=new Date().toLocaleString('es-NI',{timeZone:'America/Managua'}); pdf.text(`Generado: ${t}`, margin, pdf.internal.pageSize.getHeight()-margin+5); pdf.text(`Página ${page}`, pdfW-margin, pdf.internal.pageSize.getHeight()-margin+5, {align:'right'}); pdf.setTextColor(51); }
+        async function capture(id){ const el=document.getElementById(id); if(!el) return null; const d=el.style.display; el.style.display='block'; await new Promise(r=>setTimeout(r,30)); let c; try{ c=await html2canvas(el,{scale:1.5,backgroundColor:'#fff'});}catch{ c=null;} el.style.display=d; return c?c.toDataURL('image/png',0.92):null; }
+        function add(img, el){ if(!img||!el) return; const cw=pdfW-(margin*2); const ih=(el.offsetHeight*cw)/el.offsetWidth; if(y+ih>avail){ addHeaderFooter(); pdf.addPage(); page++; y=margin; } pdf.addImage(img,'PNG',margin,y,cw,ih); y+=ih+5; }
+        pdf.setFont('helvetica','bold'); pdf.setFontSize(16); pdf.setTextColor(37,99,235); pdf.text('Reporte – Clases teóricas', pdfW/2, y, {align:'center'}); y+=10; pdf.setFont('helvetica','normal'); pdf.setTextColor(51);
+        const blocks=['rubricForm'];
+        for(const id of blocks){ const img=await capture(id); add(img, document.getElementById(id)); }
+        addHeaderFooter(); pdf.save(`Notas_Clases_${(document.getElementById('residentName').value||'Residente').replace(/\s+/g,'_')}_${document.getElementById('evaluationDate').value||new Date().toISOString().slice(0,10)}.pdf`);
+      });
+    });
+  </script>
+</body>
+</html>

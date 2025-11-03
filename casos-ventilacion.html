@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notas de casos – Ventilación Mecánica I</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>body{font-family:'Poppins',sans-serif;background:#f9fafb}.card{border:none;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,.06)}.card-header{background:#fef3c7;color:#b45309;font-weight:700}.rubric-table th,.rubric-table td{vertical-align:top;text-align:center}.rubric-table th:first-child,.rubric-table td:first-child{text-align:left;width:45%}.score-options-wrapper{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.score-value{font-size:11px;color:#555}</style>
+</head>
+<body>
+  <div class="container my-4">
+    <header class="text-center mb-4">
+      <h1 class="h4 text-warning">Rúbrica – Presentación de casos</h1>
+      <p class="text-muted mb-0">Curso Ventilación Mecánica I</p>
+      <p><a class="small" href="index.html">← Volver al inicio</a></p>
+    </header>
+
+    <form id="rubricForm" class="needs-validation" novalidate>
+      <section class="card mb-3"><div class="card-header">Información</div>
+        <div class="card-body"><div class="row g-3">
+          <div class="col-md-6"><label class="form-label">Evaluador</label><input id="evaluator" class="form-control" required></div>
+          <div class="col-md-6"><label class="form-label">Residente</label><input id="resident" class="form-control" required></div>
+          <div class="col-md-6"><label class="form-label">Fecha</label><input id="date" type="date" class="form-control" required></div>
+          <div class="col-md-6"><label class="form-label">Caso</label><input id="case" class="form-control" placeholder="Nombre/tema del caso" required></div>
+        </div></div>
+      </section>
+
+      <section class="card rubric-section" data-max-score="35" id="s1">
+        <div class="card-header">I. Presentación del caso (35 pts) <span class="float-end text-muted score-display">Puntos: 0 / 35</span></div>
+        <div class="card-body p-0"><table class="table mb-0 rubric-table"><tbody>
+          <tr><td>Estructura y línea de tiempo</td><td><div class="score-options-wrapper">
+            <label class="score-value">7</label><input class="form-check-input" type="radio" name="c1" value="7" required>
+            <label class="score-value">6</label><input class="form-check-input" type="radio" name="c1" value="6">
+            <label class="score-value">5</label><input class="form-check-input" type="radio" name="c1" value="5">
+            <label class="score-value">3</label><input class="form-check-input" type="radio" name="c1" value="3">
+            <label class="score-value">1</label><input class="form-check-input" type="radio" name="c1" value="1">
+            <label class="score-value">0</label><input class="form-check-input" type="radio" name="c1" value="0">
+          </div></td></tr>
+          <tr><td>Datos clínicos y paraclínicos relevantes</td><td><div class="score-options-wrapper">
+            <label class="score-value">7</label><input class="form-check-input" type="radio" name="c2" value="7" required>
+            <label class="score-value">6</label><input class="form-check-input" type="radio" name="c2" value="6">
+            <label class="score-value">5</label><input class="form-check-input" type="radio" name="c2" value="5">
+            <label class="score-value">3</label><input class="form-check-input" type="radio" name="c2" value="3">
+            <label class="score-value">1</label><input class="form-check-input" type="radio" name="c2" value="1">
+            <label class="score-value">0</label><input class="form-check-input" type="radio" name="c2" value="0">
+          </div></td></tr>
+          <tr><td>Imágenes/tablas/figuras</td><td><div class="score-options-wrapper">
+            <label class="score-value">7</label><input class="form-check-input" type="radio" name="c3" value="7" required>
+            <label class="score-value">6</label><input class="form-check-input" type="radio" name="c3" value="6">
+            <label class="score-value">5</label><input class="form-check-input" type="radio" name="c3" value="5">
+            <label class="score-value">3</label><input class="form-check-input" type="radio" name="c3" value="3">
+            <label class="score-value">1</label><input class="form-check-input" type="radio" name="c3" value="1">
+            <label class="score-value">0</label><input class="form-check-input" type="radio" name="c3" value="0">
+          </div></td></tr>
+          <tr><td>Claridad y síntesis</td><td><div class="score-options-wrapper">
+            <label class="score-value">7</label><input class="form-check-input" type="radio" name="c4" value="7" required>
+            <label class="score-value">6</label><input class="form-check-input" type="radio" name="c4" value="6">
+            <label class="score-value">5</label><input class="form-check-input" type="radio" name="c4" value="5">
+            <label class="score-value">3</label><input class="form-check-input" type="radio" name="c4" value="3">
+            <label class="score-value">1</label><input class="form-check-input" type="radio" name="c4" value="1">
+            <label class="score-value">0</label><input class="form-check-input" type="radio" name="c4" value="0">
+          </div></td></tr>
+          <tr><td>Comunicación verbal/no verbal</td><td><div class="score-options-wrapper">
+            <label class="score-value">7</label><input class="form-check-input" type="radio" name="c5" value="7" required>
+            <label class="score-value">6</label><input class="form-check-input" type="radio" name="c5" value="6">
+            <label class="score-value">5</label><input class="form-check-input" type="radio" name="c5" value="5">
+            <label class="score-value">3</label><input class="form-check-input" type="radio" name="c5" value="3">
+            <label class="score-value">1</label><input class="form-check-input" type="radio" name="c5" value="1">
+            <label class="score-value">0</label><input class="form-check-input" type="radio" name="c5" value="0">
+          </div></td></tr>
+        </tbody></table></div>
+      </section>
+
+      <section class="card rubric-section" data-max-score="35" id="s2">
+        <div class="card-header">II. Razonamiento clínico (35 pts) <span class="float-end text-muted score-display">Puntos: 0 / 35</span></div>
+        <div class="card-body p-0"><table class="table mb-0 rubric-table"><tbody>
+          <tr><td>Problema y diagnóstico diferencial</td><td><div class="score-options-wrapper">
+            <label class="score-value">7</label><input class="form-check-input" type="radio" name="r1" value="7" required>
+            <label class="score-value">6</label><input class="form-check-input" type="radio" name="r1" value="6">
+            <label class="score-value">5</label><input class="form-check-input" type="radio" name="r1" value="5">
+            <label class="score-value">3</label><input class="form-check-input" type="radio" name="r1" value="3">
+            <label class="score-value">1</label><input class="form-check-input" type="radio" name="r1" value="1">
+            <label class="score-value">0</label><input class="form-check-input" type="radio" name="r1" value="0">
+          </div></td></tr>
+          <tr><td>Interpretación de exámenes</td><td><div class="score-options-wrapper">
+            <label class="score-value">7</label><input class="form-check-input" type="radio" name="r2" value="7" required>
+            <label class="score-value">6</label><input class="form-check-input" type="radio" name="r2" value="6">
+            <label class="score-value">5</label><input class="form-check-input" type="radio" name="r2" value="5">
+            <label class="score-value">3</label><input class="form-check-input" type="radio" name="r2" value="3">
+            <label class="score-value">1</label><input class="form-check-input" type="radio" name="r2" value="1">
+            <label class="score-value">0</label><input class="form-check-input" type="radio" name="r2" value="0">
+          </div></td></tr>
+          <tr><td>Plan diagnóstico/terapéutico</td><td><div class="score-options-wrapper">
+            <label class="score-value">7</label><input class="form-check-input" type="radio" name="r3" value="7" required>
+            <label class="score-value">6</label><input class="form-check-input" type="radio" name="r3" value="6">
+            <label class="score-value">5</label><input class="form-check-input" type="radio" name="r3" value="5">
+            <label class="score-value">3</label><input class="form-check-input" type="radio" name="r3" value="3">
+            <label class="score-value">1</label><input class="form-check-input" type="radio" name="r3" value="1">
+            <label class="score-value">0</label><input class="form-check-input" type="radio" name="r3" value="0">
+          </div></td></tr>
+          <tr><td>Aplicación de guías/ evidencia</td><td><div class="score-options-wrapper">
+            <label class="score-value">7</label><input class="form-check-input" type="radio" name="r4" value="7" required>
+            <label class="score-value">6</label><input class="form-check-input" type="radio" name="r4" value="6">
+            <label class="score-value">5</label><input class="form-check-input" type="radio" name="r4" value="5">
+            <label class="score-value">3</label><input class="form-check-input" type="radio" name="r4" value="3">
+            <label class="score-value">1</label><input class="form-check-input" type="radio" name="r4" value="1">
+            <label class="score-value">0</label><input class="form-check-input" type="radio" name="r4" value="0">
+          </div></td></tr>
+          <tr><td>Seguridad del paciente</td><td><div class="score-options-wrapper">
+            <label class="score-value">7</label><input class="form-check-input" type="radio" name="r5" value="7" required>
+            <label class="score-value">6</label><input class="form-check-input" type="radio" name="r5" value="6">
+            <label class="score-value">5</label><input class="form-check-input" type="radio" name="r5" value="5">
+            <label class="score-value">3</label><input class="form-check-input" type="radio" name="r5" value="3">
+            <label class="score-value">1</label><input class="form-check-input" type="radio" name="r5" value="1">
+            <label class="score-value">0</label><input class="form-check-input" type="radio" name="r5" value="0">
+          </div></td></tr>
+        </tbody></table></div>
+      </section>
+
+      <section class="card rubric-section" data-max-score="30" id="s3">
+        <div class="card-header">III. Discusión y participación (30 pts) <span class="float-end text-muted score-display">Puntos: 0 / 30</span></div>
+        <div class="card-body p-0"><table class="table mb-0 rubric-table"><tbody>
+          <tr><td>Manejo de preguntas</td><td><div class="score-options-wrapper">
+            <label class="score-value">10</label><input class="form-check-input" type="radio" name="d1" value="10" required>
+            <label class="score-value">8</label><input class="form-check-input" type="radio" name="d1" value="8">
+            <label class="score-value">6</label><input class="form-check-input" type="radio" name="d1" value="6">
+            <label class="score-value">4</label><input class="form-check-input" type="radio" name="d1" value="4">
+            <label class="score-value">2</label><input class="form-check-input" type="radio" name="d1" value="2">
+            <label class="score-value">0</label><input class="form-check-input" type="radio" name="d1" value="0">
+          </div></td></tr>
+          <tr><td>Participación del grupo</td><td><div class="score-options-wrapper">
+            <label class="score-value">10</label><input class="form-check-input" type="radio" name="d2" value="10" required>
+            <label class="score-value">8</label><input class="form-check-input" type="radio" name="d2" value="8">
+            <label class="score-value">6</label><input class="form-check-input" type="radio" name="d2" value="6">
+            <label class="score-value">4</label><input class="form-check-input" type="radio" name="d2" value="4">
+            <label class="score-value">2</label><input class="form-check-input" type="radio" name="d2" value="2">
+            <label class="score-value">0</label><input class="form-check-input" type="radio" name="d2" value="0">
+          </div></td></tr>
+          <tr><td>Conclusiones y mensajes clave</td><td><div class="score-options-wrapper">
+            <label class="score-value">10</label><input class="form-check-input" type="radio" name="d3" value="10" required>
+            <label class="score-value">8</label><input class="form-check-input" type="radio" name="d3" value="8">
+            <label class="score-value">6</label><input class="form-check-input" type="radio" name="d3" value="6">
+            <label class="score-value">4</label><input class="form-check-input" type="radio" name="d3" value="4">
+            <label class="score-value">2</label><input class="form-check-input" type="radio" name="d3" value="2">
+            <label class="score-value">0</label><input class="form-check-input" type="radio" name="d3" value="0">
+          </div></td></tr>
+        </tbody></table></div>
+      </section>
+
+      <section class="card"><div class="card-body text-center">
+        <h4>Total: <span id="total">0 / 100</span></h4>
+        <button type="button" id="calc" class="btn btn-primary me-2">Validar y Calcular</button>
+        <button type="button" id="pdf" class="btn btn-success" disabled>Exportar PDF</button>
+        <button type="reset" class="btn btn-warning ms-2">Limpiar</button>
+      </div></section>
+    </form>
+  </div>
+
+  <script>
+    const sections=document.querySelectorAll('.rubric-section');
+    const totalEl=document.getElementById('total');
+    function sectionScore(sec){let s=0;sec.querySelectorAll('input[type=radio]:checked').forEach(r=>s+=parseInt(r.value||'0'));return s;}
+    function update(){let t=0;sections.forEach(sec=>{const s=sectionScore(sec);const m=parseInt(sec.dataset.maxScore,10);sec.querySelector('.score-display').textContent=`Puntos: ${s} / ${m}`;t+=s;});totalEl.textContent=`${t} / 100`;return t;}
+    document.getElementById('rubricForm').addEventListener('change',e=>{if(e.target.type==='radio'){update();document.getElementById('pdf').disabled=true;}});
+    document.getElementById('calc').addEventListener('click',()=>{const form=document.getElementById('rubricForm');if(!form.checkValidity()){form.classList.add('was-validated');alert('Complete todos los criterios');return;}form.classList.remove('was-validated');update();document.getElementById('pdf').disabled=false;});
+    document.getElementById('pdf').addEventListener('click',async()=>{const { jsPDF }=window.jspdf;const pdf=new jsPDF({unit:'mm',format:'a4'});const el=document.body;const canvas=await html2canvas(el,{scale:1.2,backgroundColor:'#fff'});const img=canvas.toDataURL('image/png',0.92);const pageW=pdf.internal.pageSize.getWidth();const pageH=pdf.internal.pageSize.getHeight();const ratio=Math.min(pageW/canvas.width,pageH/canvas.height);const w=canvas.width*ratio;const h=canvas.height*ratio;pdf.addImage(img,'PNG',(pageW-w)/2,5,w,h);pdf.save(`Notas_Casos_${(document.getElementById('resident').value||'Residente').replace(/\s+/g,'_')}_${document.getElementById('date').value||new Date().toISOString().slice(0,10)}.pdf`);});
+  </script>
+</body>
+</html>
