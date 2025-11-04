@@ -365,9 +365,8 @@
         const ab = pdf.output('arraybuffer');
         saveToSheetButton.disabled = true; saveToSheetButton.textContent = 'Guardando...';
         try{
-          const resp = await fetch(webAppUrl, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ type:'participacion', meta, pdfBase64: ab2b64(ab), pdfFileName: pdfName }) });
-          let ok=true; try{ const j=await resp.json(); ok=!!j.ok; } catch {}
-          showFeedback(ok? 'Guardado en Google' : 'Enviado sin confirmación','success');
+          await fetch(webAppUrl, { method:'POST', mode:'no-cors', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify({ type:'participacion', meta, pdfBase64: ab2b64(ab), pdfFileName: pdfName }) });
+          showFeedback('Solicitud enviada a Google (revisa Sheet y Drive)','success');
         }catch(err){ console.error(err); showFeedback('Error de conexión al guardar','error'); }
         finally{ saveToSheetButton.disabled=false; saveToSheetButton.textContent='Guardar en Google'; }
       }
