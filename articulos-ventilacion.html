@@ -8,7 +8,22 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <style>body{font-family:'Poppins',sans-serif;background:#f9f9fb}.card{border:none;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,.06)}.card-header{background:#ecfeff;color:#0e7490;font-weight:700}.rubric-table th,.rubric-table td{vertical-align:top;text-align:center}.rubric-table th:first-child,.rubric-table td:first-child{text-align:left;width:45%}.score-options-wrapper{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.score-value{font-size:11px;color:#555}</style>
+  <style>
+    body { font-family: 'Poppins', sans-serif; background: #f9f9fb; }
+    .card { border: none; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,.06); }
+    .card-header { background: #ecfeff; color: #0e7490; font-weight: 700; }
+    .rubric-table th, .rubric-table td { vertical-align: middle; text-align: center; } /* Changed vertical-align to middle */
+    .rubric-table th:first-child, .rubric-table td:first-child { text-align: left; width: 45%; }
+    .score-options-wrapper { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; align-items: center; }
+    .score-value { font-size: 11px; color: #555; }
+    /* Estilo para que el PDF se vea mejor */
+    @media print {
+      body { background: #fff; }
+      .container { max-width: 100%; margin: 0; padding: 0; }
+      .card, .card-header, .card-body { box-shadow: none; border: 1px solid #ddd; }
+      header, .btn, form > section:last-of-type { display: none; }
+    }
+  </style>
 </head>
 <body>
   <div class="container my-4">
@@ -128,29 +143,168 @@
         </tbody></table></div>
       </section>
 
-      <section class="card"><div class="card-body text-center">
-        <h4>Total: <span id="total">0 / 100</span></h4>
-        <button type="button" id="calc" class="btn btn-primary me-2">Validar y Calcular</button>
-        <button type="button" id="save" class="btn btn-info me-2" disabled>Guardar en Google</button>
-        <button type="button" id="pdf" class="btn btn-success" disabled>Exportar PDF</button>
-        <button type="reset" class="btn btn-warning ms-2">Limpiar</button>
-      </div></section>
+      <section class="card mt-3">
+        <div class="card-body text-center">
+            <h4>Total: <span id="total">0 / 100</span></h4>
+            <button type="button" id="calc" class="btn btn-primary me-2">Validar y Calcular</button>
+            <button type="button" id="save" class="btn btn-info me-2" disabled>Guardar en Google</button>
+            <button type="button" id="pdf" class="btn btn-success" disabled>Exportar PDF</button>
+            <button type="reset" class="btn btn-warning ms-2">Limpiar</button>
+        </div>
+      </section>
     </form>
   </div>
 
   <script>
-  const GAS_URL='https://script.google.com/macros/s/AKfycbyYfrPAMOABE9Dy2_mDn1AYD9qrem2IppFfcIZFwxriAO5lR_iLBWGnuBtOUbqEhUTfkw/exec';
-  function ab2b64(buffer){let binary='';const bytes=new Uint8Array(buffer);for(let i=0;i<bytes.length;i++){binary+=String.fromCharCode(bytes[i]);}return btoa(binary);}    
-  const sections=document.querySelectorAll('.rubric-section');
-    const totalEl=document.getElementById('total');
-    function sectionScore(sec){let s=0;sec.querySelectorAll('input[type=radio]:checked').forEach(r=>s+=parseInt(r.value||'0'));return s;}
-    function update(){let t=0;sections.forEach(sec=>{const s=sectionScore(sec);const m=parseInt(sec.dataset.maxScore,10);sec.querySelector('.score-display').textContent=`Puntos: ${s} / ${m}`;t+=s;});totalEl.textContent=`${t} / 100`;return t;}
-  const saveBtn=document.getElementById('save');
-  document.getElementById('rubricForm').addEventListener('change',e=>{if(e.target.type==='radio'){update();document.getElementById('pdf').disabled=true; saveBtn.disabled=true;}});
-  document.getElementById('calc').addEventListener('click',()=>{const form=document.getElementById('rubricForm');if(!form.checkValidity()){form.classList.add('was-validated');alert('Complete todos los criterios');return;}form.classList.remove('was-validated');update();document.getElementById('pdf').disabled=false; saveBtn.disabled=false;});
-    async function buildPdf(){const { jsPDF }=window.jspdf;const pdf=new jsPDF({unit:'mm',format:'a4'});const el=document.body;const canvas=await html2canvas(el,{scale:1.2,backgroundColor:'#fff'});const img=canvas.toDataURL('image/png',0.92);const pageW=pdf.internal.pageSize.getWidth();const pageH=pdf.internal.pageSize.getHeight();const ratio=Math.min(pageW/canvas.width,pageH/canvas.height);const w=canvas.width*ratio;const h=canvas.height*ratio;pdf.addImage(img,'PNG',(pageW-w)/2,5,w,h);return pdf;}
-    document.getElementById('pdf').addEventListener('click',async()=>{const pdf=await buildPdf();pdf.save(`Notas_Articulos_${(document.getElementById('resident').value||'Residente').replace(/\s+/g,'_')}_${document.getElementById('date').value||new Date().toISOString().slice(0,10)}.pdf`);});
-  saveBtn.addEventListener('click', async()=>{if(!GAS_URL.startsWith('https://script.google.com/')){alert('Configure GAS_URL con su Web App de Apps Script.');return;}const pdf=await buildPdf();const ab=pdf.output('arraybuffer');const meta={evaluator:document.getElementById('evaluator').value||'',resident:document.getElementById('resident').value||'',date:document.getElementById('date').value||'',paper:document.getElementById('paper').value||'',total:totalEl.textContent,fileName:`Notas_Articulos_${(document.getElementById('resident').value||'Residente').replace(/\s+/g,'_')}_${document.getElementById('date').value||new Date().toISOString().slice(0,10)}.pdf`};saveBtn.disabled=true;saveBtn.textContent='Guardando...';try{await fetch(GAS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({type:'articulos',meta,pdfBase64:ab2b64(ab)})});alert('Solicitud enviada a Google (revisa Sheet y Drive).');}catch(e){console.error(e);alert('Error al enviar a Google');}finally{saveBtn.disabled=false;saveBtn.textContent='Guardar en Google';}});
+    // CAMBIO 1: Se actualizó la URL con la que proporcionaste.
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbx_B2xGPiPi-UIlWMiRJkLoOPH4pfk43HUOFzgwcTXZYI0ee7nv063vYdmEbrnijDBOEg/exec';
+    
+    // Función para convertir ArrayBuffer a Base64 (necesario para el PDF)
+    function ab2b64(buffer) {
+        let binary = '';
+        const bytes = new Uint8Array(buffer);
+        for (let i = 0; i < bytes.length; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return btoa(binary);
+    }
+
+    const sections = document.querySelectorAll('.rubric-section');
+    const totalEl = document.getElementById('total');
+    const saveBtn = document.getElementById('save');
+    const pdfBtn = document.getElementById('pdf');
+    const form = document.getElementById('rubricForm');
+
+    // Función para calcular y actualizar los puntajes en la pantalla
+    function updateScores() {
+        let totalScore = 0;
+        sections.forEach(sec => {
+            let sectionScore = 0;
+            sec.querySelectorAll('input[type=radio]:checked').forEach(r => sectionScore += parseInt(r.value || '0'));
+            const maxScore = parseInt(sec.dataset.maxScore, 10);
+            sec.querySelector('.score-display').textContent = `Puntos: ${sectionScore} / ${maxScore}`;
+            totalScore += sectionScore;
+        });
+        totalEl.textContent = `${totalScore} / 100`;
+        return totalScore;
+    }
+
+    // Cuando se cambia una selección, se actualiza el puntaje y se deshabilitan los botones de acción
+    form.addEventListener('change', e => {
+        if (e.target.type === 'radio') {
+            updateScores();
+            pdfBtn.disabled = true;
+            saveBtn.disabled = true;
+        }
+    });
+    
+    // El botón "Limpiar" ahora también resetea los puntajes a cero
+    form.addEventListener('reset', () => {
+        setTimeout(() => { // Se usa un timeout para que se ejecute después de que el formulario se limpie
+            updateScores();
+            pdfBtn.disabled = true;
+            saveBtn.disabled = true;
+            form.classList.remove('was-validated');
+        }, 0);
+    });
+
+    // El botón "Validar y Calcular" comprueba que todo esté lleno y habilita los botones
+    document.getElementById('calc').addEventListener('click', () => {
+        if (!form.checkValidity()) {
+            form.classList.add('was-validated');
+            alert('Por favor, complete todos los criterios de evaluación y la información del encabezado.');
+            return;
+        }
+        form.classList.remove('was-validated');
+        updateScores();
+        pdfBtn.disabled = false;
+        saveBtn.disabled = false;
+    });
+
+    // Función para generar el PDF
+    async function buildPdf() {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+        
+        // CAMBIO 2: Se genera el PDF solo del formulario, no de toda la página.
+        // Esto crea un documento mucho más limpio y profesional.
+        const content = document.getElementById('rubricForm');
+        // Ocultamos temporalmente los botones para que no salgan en el PDF
+        const finalCard = content.querySelector('section:last-of-type');
+        finalCard.style.display = 'none';
+
+        const canvas = await html2canvas(content, { scale: 2, backgroundColor: '#ffffff' });
+        
+        // Mostramos los botones de nuevo
+        finalCard.style.display = 'block';
+
+        const imgData = canvas.toDataURL('image/png', 0.95);
+        const pageW = pdf.internal.pageSize.getWidth();
+        const pageH = pdf.internal.pageSize.getHeight();
+        const ratio = Math.min(pageW / canvas.width, pageH / canvas.height);
+        const imgW = canvas.width * ratio * 0.95; // Pequeño margen
+        const imgH = canvas.height * ratio * 0.95;
+        const marginLeft = (pageW - imgW) / 2;
+
+        pdf.addImage(imgData, 'PNG', marginLeft, 5, imgW, imgH);
+        return pdf;
+    }
+
+    // Evento para el botón "Exportar PDF"
+    pdfBtn.addEventListener('click', async () => {
+        const pdf = await buildPdf();
+        const residentName = (document.getElementById('resident').value || 'Residente').replace(/\s+/g, '_');
+        const date = document.getElementById('date').value || new Date().toISOString().slice(0, 10);
+        pdf.save(`Notas_Articulos_${residentName}_${date}.pdf`);
+    });
+
+    // Evento para el botón "Guardar en Google"
+    saveBtn.addEventListener('click', async () => {
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Guardando...';
+
+        try {
+            const pdf = await buildPdf();
+            const pdfArrayBuffer = pdf.output('arraybuffer');
+            
+            const meta = {
+                evaluator: document.getElementById('evaluator').value || '',
+                resident: document.getElementById('resident').value || '',
+                date: document.getElementById('date').value || '',
+                paper: document.getElementById('paper').value || '',
+                total: totalEl.textContent,
+                fileName: `Notas_Articulos_${(document.getElementById('resident').value || 'Residente').replace(/\s+/g, '_')}_${document.getElementById('date').value || new Date().toISOString().slice(0, 10)}.pdf`
+            };
+            
+            const payload = {
+                type: 'articulos', // En caso de que uses el script para otras rúbricas
+                meta: meta,
+                pdfBase64: ab2b64(pdfArrayBuffer)
+            };
+
+            // CAMBIO 3: Se mejoró la comunicación para recibir una respuesta del script.
+            // Ahora sabemos si la operación fue exitosa o si hubo un error.
+            const response = await fetch(GAS_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                alert('¡Éxito! Los datos y el PDF se han guardado correctamente en Google Sheets y Drive.');
+            } else {
+                throw new Error(result.message); // Lanza un error si el script devuelve un fallo
+            }
+
+        } catch (e) {
+            console.error(e);
+            alert('Error al guardar en Google: ' + e.message);
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Guardar en Google';
+        }
+    });
   </script>
 </body>
 </html>
